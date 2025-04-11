@@ -36,15 +36,14 @@ export default class HumanEnforcerService extends WorkerEntrypoint<Env> implemen
     const contextId = crypto.randomUUID();
     try {
       const enforcer = await HumanSecurityEnforcer.initialize(config, this.env);
-      enforcerStore.set(contextId, enforcer);
       const retVal = await enforcer.enforce(this.ctx, request);
       if (retVal instanceof Response) {
-        enforcerStore.delete(contextId);
         return {
           response: retVal,
         }
       }
 
+      enforcerStore.set(contextId, enforcer);
       return {
         contextId,
         request: retVal,
@@ -67,13 +66,13 @@ export default class HumanEnforcerService extends WorkerEntrypoint<Env> implemen
     }
 
     try {
-      const res = await enforcer.postEnforce(this.ctx, response);
-      enforcerStore.delete(contextId);
-      return res;
+      return await enforcer.postEnforce(this.ctx, response);
     } catch (error) {
       console.error('Error in postEnforce:', error);
       // Return the original response if there's an error
       return response;
+    } finally {
+      enforcerStore.delete(contextId);
     }
   }
 }

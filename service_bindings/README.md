@@ -101,7 +101,7 @@ The workers use Cloudflare's RPC Service Bindings to communicate. The `customer-
 
 To update the service binding configuration:
 
-1. Edit the `wrangler.toml` file in the `customer-service` directory
+1. Edit the `wrangler.json` file in the `customer-service` directory
 2. Update the `services` section with the correct binding name and service name
 3. Redeploy both workers
 
