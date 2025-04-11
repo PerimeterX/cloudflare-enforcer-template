@@ -32,24 +32,18 @@ const config: HumanSecurityConfiguration = {
 const enforcerStore: Map<string, HumanSecurityEnforcer> = new Map<string, HumanSecurityEnforcer>();
 
 export default class HumanEnforcerService extends WorkerEntrypoint<Env> implements IHumanEnforcerService {
-  async fetch(req: Request): Promise<never> {
-    throw new Error('fetch method not implemented');
-  }
-
   async enforce(request: Request): Promise<EnforceResponse> {
-    const enforcer = await HumanSecurityEnforcer.initialize(config, this.env);
-
+    const contextId = crypto.randomUUID();
     try {
+      const enforcer = await HumanSecurityEnforcer.initialize(config, this.env);
+      enforcerStore.set(contextId, enforcer);
       const retVal = await enforcer.enforce(this.ctx, request);
       if (retVal instanceof Response) {
+        enforcerStore.delete(contextId);
         return {
           response: retVal,
         }
       }
-
-      const contextId = crypto.randomUUID();
-      enforcerStore.set(contextId, enforcer);
-      console.log('saved enforcer with contextId:', contextId);
 
       return {
         contextId,
@@ -57,9 +51,10 @@ export default class HumanEnforcerService extends WorkerEntrypoint<Env> implemen
       };
     } catch (error) {
       console.error('Error in enforce:', error);
-      // Return a 500 response if there's an error
+      // Return the original request if there's an error
       return {
-        response: new Response('Internal Server Error', { status: 500 })
+        request,
+        contextId,
       };
     }
   }
