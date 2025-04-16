@@ -1,20 +1,7 @@
-type EnforceResponse = {
-  contextId: string;
-  request: Request;
-  response?: never;
-} | {
-  contextId?: never;
-  request?: never;
-  response: Response;
-}
-
-interface HumanEnforcerService {
-  enforce(request: Request): Promise<EnforceResponse>;
-  postEnforce(contextId: string, response: Response): Promise<Response>;
-}
+import { IHumanEnforcerService } from '../../shared_types';
 
 interface Env {
-  HUMAN_ENFORCER_SERVICE: HumanEnforcerService;
+  HUMAN_ENFORCER_SERVICE: IHumanEnforcerService;
 }
 
 export default {

@@ -1,32 +1,11 @@
 import { WorkerEntrypoint } from "cloudflare:workers";
-import { HumanSecurityEnforcer, HumanSecurityConfiguration } from "@humansecurity/cloudflare-enforcer";
+import { HumanSecurityEnforcer } from "@humansecurity/cloudflare-enforcer";
 
-interface IHumanEnforcerService {
-  enforce(request: Request): Promise<EnforceResponse>;
-  postEnforce(contextId: string, response: Response): Promise<Response>;
-}
-
-type EnforceResponse = {
-  contextId: string;
-  request: Request;
-  response?: never;
-} | {
-  contextId?: never;
-  request?: never;
-  response: Response;
-}
+import { IHumanEnforcerService, EnforceResponse } from "../../shared_types";
+import config from './config.json';
 
 type Env = {
   PXKV: KVNamespace;
-}
-
-const config: HumanSecurityConfiguration = {
-  px_app_id: "",
-  px_auth_token: "",
-  px_cookie_secret: "",
-  px_remote_config_auth_token: "",
-  px_remote_config_id: "",
-  px_logger_auth_token: "",
 }
 
 const enforcerStore: Map<string, HumanSecurityEnforcer> = new Map<string, HumanSecurityEnforcer>();
